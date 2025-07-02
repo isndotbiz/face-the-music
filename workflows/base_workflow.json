@@ -35,7 +35,9 @@
         {
             "type": "Upscale",
             "inputs": {
-                "enabled": false
+                "enabled": false,
+                "upscale_method": "nearest-exact",
+                "scale_by": 2.0
             }
         }
     ]

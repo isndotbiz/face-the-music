@@ -18,6 +18,9 @@ class ComfyUIAPI:
             return json.load(f)
 
     def inject_prompts(self, workflow: Dict[str, Any], prompt: str, negative_prompt: str, sd_settings: Dict[str, Any], face_swap_path: Optional[str], enhance: bool, upscale: bool) -> Dict[str, Any]:
+        # This function maintains upscaler integration by preserving the upscale flag and hires_fix setting
+        # The upscale parameter controls the Upscale node, and hires_fix is maintained in sd_settings
+        # This ensures that ComfyUI applies upscaling before the image is returned for face swapping
         # This function should be customized to match your workflow JSON structure.
         # Example: find nodes by type or label and set their parameters.
         for node in workflow.get('nodes', []):

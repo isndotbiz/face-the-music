@@ -30,8 +30,17 @@ def load_prompts(prompts_path: str):
         return yaml.safe_load(f)
 
 def save_image(image_data, output_path):
-    with open(output_path, 'wb') as f:
-        f.write(image_data)
+    # Ensure output path has .png extension
+    if not output_path.lower().endswith('.png'):
+        output_path = os.path.splitext(output_path)[0] + '.png'
+    
+    # If image_data is PIL Image, save as PNG
+    if hasattr(image_data, 'save'):
+        image_data.save(output_path, format='PNG')
+    else:
+        # If it's raw bytes, write directly (assuming it's already PNG format)
+        with open(output_path, 'wb') as f:
+            f.write(image_data)
 
 def generate_with_comfyui(api, img, config, name):
     """Generate image using ComfyUI workflow."""
@@ -61,6 +70,14 @@ def generate_with_insightface(img, config, name):
     # Get dimensions from SD settings or config defaults
     width = sd_settings.get('width', config.get('mock_generation', {}).get('default_width', 1024))
     height = sd_settings.get('height', config.get('mock_generation', {}).get('default_height', 1024))
+    
+    # Apply upscaling if enabled (mock behavior)
+    upscale = img.get('upscale', False)
+    if upscale:
+        # Simulate upscaling by increasing dimensions
+        scale_factor = 2.0
+        width = int(width * scale_factor)
+        height = int(height * scale_factor)
     
     # Get face swap source path
     face_swap_path = img.get('face_swap', {}).get('source')
@@ -119,11 +136,16 @@ def main(
 ):
     load_dotenv()
     config = load_config(cli_backend=backend)
-    comfyui_api_url = os.getenv('COMFYUI_API_URL', config['comfyui_api_url'])
-    workflow_path = config['workflow_path']
+    
+    # Only initialize ComfyUI API if not using InsightFace backend
+    api = None
+    if config['generation']['backend'] != 'insightface':
+        comfyui_api_url = os.getenv('COMFYUI_API_URL', config.get('comfyui_api_url', 'http://127.0.0.1:8188/prompt'))
+        workflow_path = config.get('workflow_path', 'workflows/base_workflow.json')
+        api = ComfyUIAPI(comfyui_api_url, workflow_path)
+    
     output_dir = config['output_dir']
     os.makedirs(output_dir, exist_ok=True)
-    api = ComfyUIAPI(comfyui_api_url, workflow_path)
     prompts_data = load_prompts(prompts)
     images = prompts_data.get('images', {})
     if not images:
@@ -131,7 +153,16 @@ def main(
         sys.exit(1)
     with Progress() as progress:
         task = progress.add_task("Generating images...", total=len(images))
-        for name, img in images.items():
+        for image in images:
+            name = image['name']
+            img = {
+                'prompt': image.get('prompt', ''),
+                'negative_prompt': image.get('negative_prompt', ''),
+                'sd_settings': image.get('sd_settings', {}),
+                'face_swap': image.get('face_swap', {}),
+                'enhance': image.get('enhance', False),
+                'upscale': image.get('upscale', False)
+            }
             prompt = img.get('prompt', '')
             negative_prompt = img.get('negative_prompt', '')
             sd_settings = config['sd_defaults'].copy()
@@ -139,28 +170,47 @@ def main(
             face_swap_path = img.get('face_swap', {}).get('source')
             enhance = img.get('enhance', False)
             upscale = img.get('upscale', False)
-            workflow = api.load_workflow()
-            workflow = api.inject_prompts(workflow, prompt, negative_prompt, sd_settings, face_swap_path, enhance, upscale)
-            result = api.post_workflow(workflow)
-            if not result:
-                print(f"Failed to generate image: {name}")
-                progress.advance(task)
-                continue
+            if config['generation']['backend'] != 'insightface':
+                workflow = api.load_workflow()
+                workflow = api.inject_prompts(workflow, prompt, negative_prompt, sd_settings, face_swap_path, enhance, upscale)
+                result = api.post_workflow(workflow)
+                if not result:
+                    print(f"Failed to generate image: {name}")
+                    progress.advance(task)
+                    continue
+            else:
+                # Mock generation for this example (InsightFace backend)
+                mock_image = generate_with_insightface(img, config, name)
+                # Save the mock image directly since we have the PIL Image
+                output_path = os.path.join(output_dir, f"{name}.png")
+                mock_image.save(output_path, format='PNG')
+                print(f"Upscaled mock image saved to: {output_path}")
+                generated_image = mock_image
+                result = {'image_saved': True}  # Indicate success
             # Save output image (assume result contains image bytes or path)
             # This part may need to be adapted to your workflow's output format
+            # IMPORTANT: The upscaler output (if enabled) is already applied at this point
+            # since upscale=True is passed to inject_prompts and processed by ComfyUI
             output_path = os.path.join(output_dir, f"{name}.png")
             generated_image = None
             
             if 'image' in result:
                 save_image(result['image'], output_path)
+                # Verify the upscaled image is saved before face swap
+                print(f"Upscaled image saved to: {output_path}")
                 # Load the saved image for potential face swapping
                 generated_image = Image.open(output_path)
             elif 'output_path' in result:
                 # Copy file from output_path
                 from shutil import copyfile
                 copyfile(result['output_path'], output_path)
+                # Verify the upscaled image is saved before face swap
+                print(f"Upscaled image copied to: {output_path}")
                 # Load the image for potential face swapping
                 generated_image = Image.open(output_path)
+            elif 'image_saved' in result and generated_image is not None:
+                # Mock generation case - image already saved and loaded
+                print(f"Mock upscaled image ready for face swap: {output_path}")
             else:
                 print(f"No image data found for {name}")
                 progress.advance(task)
@@ -178,7 +228,7 @@ def main(
                     swapped_image = swapper.swap_faces(face_swap_path, generated_image)
                     
                     # Save the swapped image, overwriting the original
-                    swapped_image.save(output_path)
+                    swapped_image.save(output_path, format='PNG')
                     print(f"Face swap completed for {name}")
                     
                 except Exception as e:

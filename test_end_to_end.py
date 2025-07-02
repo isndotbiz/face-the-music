@@ -97,7 +97,7 @@ def main(prompts: str = typer.Option('promfy_prompts.yaml', help="Prompt YAML fi
             
             # Save the "generated" image
             output_path = os.path.join(output_dir, f"{name}.png")
-            generated_image.save(output_path)
+            generated_image.save(output_path, format='PNG')
             print(f"✓ Mock image generated: {output_path}")
             
             # Perform local face swap if configured
@@ -113,7 +113,7 @@ def main(prompts: str = typer.Option('promfy_prompts.yaml', help="Prompt YAML fi
                     swapped_image = swapper.swap_faces(face_swap_path, generated_image)
                     
                     # Save the swapped image, overwriting the original
-                    swapped_image.save(output_path)
+                    swapped_image.save(output_path, format='PNG')
                     print(f"✅ Face swap completed for {name}")
                     
                 except Exception as e:

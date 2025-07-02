@@ -1,0 +1,34 @@
+# Example prompt file for Face The Music
+images:
+  - name: "rockstar_portrait"
+    prompt: "A charismatic rockstar on stage, dramatic lighting, photorealistic, 8k"
+    negative_prompt: "blurry, low quality, watermark"
+    sd_settings:
+      model: "sd_xl_base_1.0.safetensors"
+      steps: 40
+      cfg: 8.0
+      sampler: "DPM++ 2M Karras"
+      seed: 12345
+      width: 1024
+      height: 1024
+      hires_fix: true
+    face_swap:
+      source: "faces/rockstar_face.jpg"
+    enhance: true
+    upscale: true
+  - name: "jazz_band"
+    prompt: "A jazz band performing in a smoky club, 1950s style, high detail"
+    negative_prompt: "cartoon, lowres, text"
+    sd_settings:
+      model: "sd_xl_base_1.0.safetensors"
+      steps: 30
+      cfg: 7.5
+      sampler: "Euler a"
+      seed: 54321
+      width: 896
+      height: 1152
+      hires_fix: false
+    face_swap:
+      source: "faces/jazz_face.png"
+    enhance: false
+    upscale: true 

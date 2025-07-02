@@ -1,0 +1,9 @@
+requests
+python-dotenv
+PyYAML
+typer
+rich
+tqdm
+aiohttp
+Pillow
+numpy 

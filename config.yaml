@@ -1,0 +1,16 @@
+# Default configuration for Face The Music image generation
+comfyui_api_url: http://127.0.0.1:8188/prompt
+workflow_path: workflows/base_workflow.json
+output_dir: output
+faces_dir: faces
+models_dir: models
+
+sd_defaults:
+  model: "sd_xl_base_1.0.safetensors"
+  steps: 30
+  cfg: 7.0
+  sampler: "Euler a"
+  seed: -1
+  width: 1024
+  height: 1024
+  hires_fix: true 

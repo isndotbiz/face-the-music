@@ -1,9 +1,6 @@
-# Example prompt file for Face The Music
-# Face swap backend options:
-# - "comfyui": Use ComfyUI for face swapping
-# - "insightface": Use local InsightFace for face swapping
+# Test prompt file with mixed face swap and non-face swap images
 images:
-  - name: "rockstar_portrait"
+  - name: "rockstar_with_face_swap"
     prompt: "A charismatic rockstar on stage, dramatic lighting, photorealistic, 8k"
     negative_prompt: "blurry, low quality, watermark"
     sd_settings:
@@ -20,20 +17,18 @@ images:
       backend: "insightface"
     enhance: true
     upscale: true
-  - name: "jazz_band"
-    prompt: "A jazz band performing in a smoky club, 1950s style, high detail"
-    negative_prompt: "cartoon, lowres, text"
+  - name: "landscape_no_face_swap"
+    prompt: "Beautiful mountain landscape at sunset, no people, nature photography"
+    negative_prompt: "people, faces, humans, blurry, low quality"
     sd_settings:
       model: "sd_xl_base_1.0.safetensors"
       steps: 30
       cfg: 7.5
       sampler: "Euler a"
       seed: 54321
-      width: 896
-      height: 1152
+      width: 1024
+      height: 768
       hires_fix: false
-    face_swap:
-      source: "faces/your_face.png"
-      backend: "insightface"
+    # Note: no face_swap section - this image should remain unchanged
     enhance: false
-    upscale: true 
+    upscale: false

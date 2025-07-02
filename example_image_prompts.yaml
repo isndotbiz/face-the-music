@@ -1,0 +1,100 @@
+# example_image_prompts.yaml - Designed for luxury/dominance niche
+
+images:
+  dominant_chamber_portrait_001:
+    prompt: |
+      Ultra photorealistic 8K photo of an attractive 30-year-old woman, 
+      commanding presence, seated in an antique velvet armchair within a dimly lit, 
+      opulent chamber. Soft, dramatic candlelight casts long shadows and highlights, 
+      with a subtle atmospheric haze enriching the scene. She wears a meticulously 
+      tailored dark power suit, adorned with minimalist, high-end gold jewelry. 
+      Her expression is one of quiet supremacy and astute intelligence. Low-angle 
+      shot, focusing from her designer heels slowly ascending to her piercing gaze. 
+      Cinematic portrait, professional studio lighting, rich deep colors, sharp focus, 
+      intricate skin texture, high fashion editorial, Hasselblad medium format camera.
+      --ar 9:16 --seed 5678 --quality 2.0 --style raw
+    
+    sd_settings:
+      model: "black-forest-labs/flux-1.1-pro"
+      steps: 30
+      cfg_scale: 7.0
+      negative_prompt: |
+        cartoon, illustration, painting, drawing, low quality, blurry, pixelated, deformed, distorted, 
+        text, watermark, signature, bad anatomy, bad hands, mutated fingers, poor lighting, 
+        ugly, disfigured, childish, simplistic, oversaturated, grayscale
+      seed: 5678
+      width: 1080
+      height: 1920
+
+    face_swap:
+      enabled: true
+      source_face_path: "faces/your_face.png" # <--- IMPORTANT: Ensure this path is correct!
+      enhance_face: true 
+
+    upscale:
+      enabled: true # Set to true if you implement upscaling
+      # Add upscaler specific settings if needed, e.g., scale: 4, model: "replicate/esrgan-v1-4x"
+
+  luxury_car_domination_002:
+    prompt: |
+      High-resolution photorealistic 8K photo of an attractive 30-year-old woman, 
+      standing commandingly beside a sleek, matte black luxury car (e.g., Rolls-Royce 
+      Phantom, Bugatti Chiron) in a private, minimalist, dimly lit garage. Volumetric 
+      light streaks pierce through the haze, highlighting her powerful silhouette 
+      and the car's contours. She wears an exquisite, dark leather outfit or a 
+      structured couture gown. Her gaze is direct and unwavering, conveying absolute control. 
+      Wide shot, emphasizing scale and power, cinematic composition, deep shadows, 
+      neon accents from indirect lighting, professional automotive photography, Phase One camera.
+      --ar 9:16 --seed 5679 --quality 2.0 --style raw
+
+    sd_settings:
+      model: "black-forest-labs/flux-1.1-pro"
+      steps: 30
+      cfg_scale: 7.0
+      negative_prompt: |
+        cartoon, illustration, painting, drawing, low quality, blurry, distorted car, 
+        text, watermark, signature, bad anatomy, poor lighting, ugly, disfigured, 
+        toy car, cartoon car, messy background
+      seed: 5679
+      width: 1080
+      height: 1920
+
+    face_swap:
+      enabled: true
+      source_face_path: "faces/your_face.png" # <--- Use the same face or a different one
+      enhance_face: true
+
+    upscale:
+      enabled: true # Set to true if you implement upscaling
+
+  opulent_throne_figure_003:
+    prompt: |
+      Stunning photorealistic 8K portrait of an attractive 30-year-old woman, 
+      seated on an ornate, gothic-inspired throne within a grand, darkly lit hall. 
+      Torches or large candelabras cast flickering, dancing light that plays across 
+      her regal features and the heavy, rich textures of her velvet gown or elaborate cloak. 
+      Her expression is stern, unyielding, and utterly dominant. Slight high-angle 
+      shot looking down, emphasizing her authority. Cinematic composition, deep, 
+      moody colors, intricate details on attire and throne, dramatic shadows, 
+      soft haze, high resolution.
+      --ar 9:16 --seed 5680 --quality 2.0 --style raw
+    
+    sd_settings:
+      model: "black-forest-labs/flux-1.1-pro"
+      steps: 30
+      cfg_scale: 7.0
+      negative_prompt: |
+        cartoon, illustration, painting, drawing, low quality, blurry, distorted, 
+        text, watermark, signature, bad anatomy, bad hands, poor lighting, 
+        ugly, simplistic throne, cheap materials
+      seed: 5680
+      width: 1080
+      height: 1920
+
+    face_swap:
+      enabled: true
+      source_face_path: "faces/your_face.png" # <--- Use the same face or a different one
+      enhance_face: true
+
+    upscale:
+      enabled: false # Example: Disable upscaling for this one, or enable if you prefer

@@ -22,6 +22,52 @@ pip install -r requirements.txt
 python setup.py
 ```
 
+### Installing InsightFace
+For face swap functionality, you need to install InsightFace:
+
+```bash
+# Install InsightFace
+pip install insightface
+
+# For GPU support (recommended)
+pip install onnxruntime-gpu
+
+# For CPU-only (fallback)
+pip install onnxruntime
+```
+
+**Note:** InsightFace requires specific system dependencies:
+- **Linux/macOS**: Usually works out of the box
+- **Windows**: May require Visual Studio Build Tools
+- **GPU**: Requires CUDA-compatible GPU and drivers
+
+### Downloading ONNX Models
+InsightFace requires ONNX models for face detection and recognition:
+
+```bash
+# Create models directory
+mkdir -p models/insightface
+
+# Download the recommended models
+# Option 1: Download via Python script
+python -c "
+import insightface
+app = insightface.app.FaceAnalysis()
+app.prepare(ctx_id=0, det_size=(640, 640))
+"
+
+# Option 2: Manual download
+# Download antelopev2.zip from:
+# https://github.com/deepinsight/insightface/releases/tag/v0.7
+# Extract to models/insightface/
+```
+
+**Available Models:**
+- `antelopev2`: Recommended for best accuracy
+- `buffalo_l`: Good balance of speed and accuracy
+- `buffalo_m`: Faster, moderate accuracy
+- `buffalo_s`: Fastest, basic accuracy
+
 ## Configuration
 - Copy `.env.example` to `.env` and adjust the `COMFYUI_API_URL` if needed.
 - Edit `config.yaml` for default SD settings and workflow paths.
@@ -45,6 +91,43 @@ python setup.py
 ```bash
 python generate_images.py --prompts promfy_prompts.yaml
 ```
+
+### Face Swap Backend Selection
+You can choose between different face swap backends depending on your needs:
+
+#### Using InsightFace (Recommended)
+```bash
+# Default - uses InsightFace if available
+python generate_images.py --prompts promfy_prompts.yaml
+
+# Explicitly specify InsightFace
+python generate_images.py --prompts promfy_prompts.yaml --face-swap-backend insightface
+```
+
+#### Using Reactor (Alternative)
+```bash
+# Use Reactor backend
+python generate_images.py --prompts promfy_prompts.yaml --face-swap-backend reactor
+```
+
+#### Configuration in YAML
+You can also specify the backend in your prompt YAML file:
+
+```yaml
+default_settings:
+  face_swap_backend: "insightface"  # or "reactor"
+  
+prompts:
+  - text: "a portrait of a person"
+    face_swap:
+      backend: "insightface"  # Override per prompt
+      source_face: "faces/person1.jpg"
+```
+
+#### Backend Comparison
+- **InsightFace**: Better accuracy, more stable, requires ONNX models
+- **Reactor**: Faster setup, built into some ComfyUI installations
+- **Auto-detection**: The application will automatically detect available backends
 
 ## Example Prompt File
 See `promfy_prompts.yaml` for structure and options.

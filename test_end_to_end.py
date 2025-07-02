@@ -79,8 +79,7 @@ def main(prompts: str = typer.Option('promfy_prompts.yaml', help="Prompt YAML fi
     with Progress() as progress:
         task = progress.add_task("Processing images...", total=len(images))
         
-        for img in images:
-            name = img.get('name', 'output')
+        for name, img in images.items():
             prompt = img.get('prompt', '')
             sd_settings = config['sd_defaults'].copy()
             sd_settings.update(img.get('sd_settings', {}))
@@ -109,8 +108,13 @@ def main(prompts: str = typer.Option('promfy_prompts.yaml', help="Prompt YAML fi
                     # Initialize the swapper with model path from config
                     swapper = InsightFaceSwapper(config['face_swap']['model_path'])
                     
-                    # Perform face swap
-                    swapped_image = swapper.swap_faces(face_swap_path, generated_image)
+                    # Perform improved face swap with 1024x1024 preparation
+                    swapped_image = swapper.swap_faces_improved(
+                        face_swap_path, 
+                        generated_image, 
+                        use_preparation=True, 
+                        canvas_color='#FFFFFF'
+                    )
                     
                     # Save the swapped image, overwriting the original
                     swapped_image.save(output_path, format='PNG')
@@ -132,8 +136,7 @@ def main(prompts: str = typer.Option('promfy_prompts.yaml', help="Prompt YAML fi
     print("SUMMARY:")
     print("="*60)
     
-    for img in images:
-        name = img.get('name', 'output')
+    for name, img in images.items():
         face_swap_path = img.get('face_swap', {}).get('source')
         output_path = os.path.join(output_dir, f"{name}.png")
         

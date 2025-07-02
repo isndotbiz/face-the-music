@@ -5,10 +5,14 @@ import typer
 from dotenv import load_dotenv
 from rich.progress import Progress
 from comfyui_api import ComfyUIAPI
-from PIL import Image, ImageDraw
-from face_swapper import InsightFaceSwapper
+from PIL import Image, ImageDraw, ImageOps
+# Face swapping now handled natively by Flux Kontext Pro
+from replicate_generator import ReplicateFluxGenerator
 
 app = typer.Typer()
+
+# Define constant for temporary face directory
+PREPARED_FACE_DIR = None  # Will be set in main() after output_dir is determined
 
 def load_config(config_path: str = 'config.yaml', cli_backend: str = None):
     with open(config_path, 'r') as f:
@@ -42,6 +46,38 @@ def save_image(image_data, output_path):
         with open(output_path, 'wb') as f:
             f.write(image_data)
 
+def prepare_source_face_image(source_path: str, temp_dir: str) -> str:
+    # Load image
+    img = Image.open(source_path)
+    
+    # Convert to RGB with white background for better face detection
+    if img.mode in ('RGBA', 'P'):
+        # Create white background
+        background = Image.new('RGB', img.size, (255, 255, 255))
+        if img.mode == 'P':
+            img = img.convert('RGBA')
+        # Paste with transparency support
+        background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+        img = background
+    elif img.mode != 'RGB':
+        img = img.convert('RGB')
+    
+    # Create square canvas (RGB with white background)
+    size = 1024
+    canvas = Image.new("RGB", (size, size), (255, 255, 255))
+    
+    # Center source on canvas with scaling
+    img.thumbnail((size, size), Image.LANCZOS)
+    x = (size - img.width) // 2
+    y = (size - img.height) // 2
+    canvas.paste(img, (x, y))
+    
+    # Save prepared image
+    filename = os.path.splitext(os.path.basename(source_path))[0] + "_prep.png"
+    out_path = os.path.join(temp_dir, filename)
+    canvas.save(out_path, format="PNG")
+    return out_path
+
 def generate_with_comfyui(api, img, config, name):
     """Generate image using ComfyUI workflow."""
     prompt = img.get('prompt', '')
@@ -62,6 +98,38 @@ def generate_with_comfyui(api, img, config, name):
     # Return the result for further processing
     return result
 
+def generate_with_flux(img, config, name):
+    """Generate image using Replicate Flux with face swap and upscaling."""
+    try:
+        # Initialize Flux generator
+        flux_generator = ReplicateFluxGenerator()
+        
+        # Get configuration
+        prompt = img.get('prompt', '')
+        face_swap_path = img.get('face_swap', {}).get('source')
+        enhance = img.get('enhance', False)
+        upscale = img.get('upscale', False)
+        
+        # Merge SD settings
+        sd_settings = config['sd_defaults'].copy()
+        sd_settings.update(img.get('sd_settings', {}))
+        
+        # Use complete workflow: Flux → Face Swap → Upscale
+        result_image = flux_generator.generate_with_face_swap_and_upscale(
+            prompt=prompt,
+            face_source_path=face_swap_path,
+            config=config,
+            sd_settings=sd_settings,
+            enhance=enhance,
+            upscale=upscale
+        )
+        
+        return result_image
+        
+    except Exception as e:
+        print(f"❌ Error in Flux generation for {name}: {e}")
+        return None
+
 def generate_with_insightface(img, config, name):
     """Generate mock image using InsightFace approach (mirrors test_end_to_end.py)."""
     sd_settings = config['sd_defaults'].copy()
@@ -80,7 +148,7 @@ def generate_with_insightface(img, config, name):
         height = int(height * scale_factor)
     
     # Get face swap source path
-    face_swap_path = img.get('face_swap', {}).get('source')
+    face_swap_path = img['face_swap']['source']
     
     if face_swap_path and os.path.exists(face_swap_path):
         # Use the source face as a base for our mock generated image
@@ -146,6 +214,18 @@ def main(
     
     output_dir = config['output_dir']
     os.makedirs(output_dir, exist_ok=True)
+    
+    # Set the temporary face directory constant
+    global PREPARED_FACE_DIR
+    PREPARED_FACE_DIR = os.path.join(output_dir, "temp_faces")
+    os.makedirs(PREPARED_FACE_DIR, exist_ok=True)
+    
+    # Clean up old files from previous runs
+    if os.path.exists(PREPARED_FACE_DIR):
+        for f in os.listdir(PREPARED_FACE_DIR):
+            file_path = os.path.join(PREPARED_FACE_DIR, f)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
     prompts_data = load_prompts(prompts)
     images = prompts_data.get('images', {})
     if not images:
@@ -153,8 +233,7 @@ def main(
         sys.exit(1)
     with Progress() as progress:
         task = progress.add_task("Generating images...", total=len(images))
-        for image in images:
-            name = image['name']
+        for name, image in images.items():
             img = {
                 'prompt': image.get('prompt', ''),
                 'negative_prompt': image.get('negative_prompt', ''),
@@ -163,6 +242,13 @@ def main(
                 'enhance': image.get('enhance', False),
                 'upscale': image.get('upscale', False)
             }
+            
+            # Prepare source face image if defined
+            original_source = img['face_swap'].get('source')
+            if original_source:
+                prepared = prepare_source_face_image(original_source, PREPARED_FACE_DIR)
+                img['face_swap']['source'] = prepared
+            
             prompt = img.get('prompt', '')
             negative_prompt = img.get('negative_prompt', '')
             sd_settings = config['sd_defaults'].copy()
@@ -170,7 +256,23 @@ def main(
             face_swap_path = img.get('face_swap', {}).get('source')
             enhance = img.get('enhance', False)
             upscale = img.get('upscale', False)
-            if config['generation']['backend'] != 'insightface':
+            # Choose generation backend
+            backend = config['generation']['backend']
+            
+            if backend == 'flux':
+                # Use Flux workflow with face swap and upscaling
+                generated_image = generate_with_flux(img, config, name)
+                if generated_image:
+                    output_path = os.path.join(output_dir, f"{name}.png")
+                    save_image(generated_image, output_path)
+                    print(f"✅ Flux image with face swap and upscaling saved to: {output_path}")
+                    result = {'image_saved': True}
+                else:
+                    print(f"❌ Failed to generate image with Flux: {name}")
+                    progress.advance(task)
+                    continue
+            elif backend == 'comfyui':
+                # Use ComfyUI workflow
                 workflow = api.load_workflow()
                 workflow = api.inject_prompts(workflow, prompt, negative_prompt, sd_settings, face_swap_path, enhance, upscale)
                 result = api.post_workflow(workflow)
@@ -179,14 +281,13 @@ def main(
                     progress.advance(task)
                     continue
             else:
-                # Mock generation for this example (InsightFace backend)
+                # Mock generation for InsightFace backend
                 mock_image = generate_with_insightface(img, config, name)
-                # Save the mock image directly since we have the PIL Image
                 output_path = os.path.join(output_dir, f"{name}.png")
                 mock_image.save(output_path, format='PNG')
                 print(f"Upscaled mock image saved to: {output_path}")
                 generated_image = mock_image
-                result = {'image_saved': True}  # Indicate success
+                result = {'image_saved': True}
             # Save output image (assume result contains image bytes or path)
             # This part may need to be adapted to your workflow's output format
             # IMPORTANT: The upscaler output (if enabled) is already applied at this point
@@ -216,24 +317,8 @@ def main(
                 progress.advance(task)
                 continue
             
-            # Perform local face swap if configured
-            if (face_swap_path and 'face_swap' in config and 
-                config['face_swap'].get('backend') == 'insightface'):
-                try:
-                    print(f"Performing local face swap for {name}...")
-                    # Initialize the swapper with model path from config
-                    swapper = InsightFaceSwapper(config['face_swap']['model_path'])
-                    
-                    # Perform face swap
-                    swapped_image = swapper.swap_faces(face_swap_path, generated_image)
-                    
-                    # Save the swapped image, overwriting the original
-                    swapped_image.save(output_path, format='PNG')
-                    print(f"Face swap completed for {name}")
-                    
-                except Exception as e:
-                    print(f"Face swap failed for {name}: {e}")
-                    # Continue with the original image if face swap fails
+            # Face swapping is now handled natively by Flux Kontext Pro during generation
+            # No additional face swap processing needed
             progress.advance(task)
     print(f"\nAll images processed. Check the '{output_dir}' directory.")
 

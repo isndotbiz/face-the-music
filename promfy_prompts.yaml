@@ -1,39 +1,142 @@
-# Example prompt file for Face The Music
-# Face swap backend options:
-# - "comfyui": Use ComfyUI for face swapping
-# - "insightface": Use local InsightFace for face swapping
+# example_image_prompts.yaml - Optimized for Flux Kontext Pro with Native Face Swapping
 images:
-  - name: "rockstar_portrait"
-    prompt: "A charismatic rockstar on stage, dramatic lighting, photorealistic, 8k"
-    negative_prompt: "blurry, low quality, watermark"
+  dominant_chamber_portrait_01:
+    prompt: |
+      Ultra photorealistic RAW 8K photo of an attractive 30-year-old woman, 
+      commanding presence, seated in an antique velvet armchair within a dimly lit, 
+      opulent chamber. Soft, dramatic candlelight casts long shadows and highlights, 
+      with a subtle atmospheric haze enriching the scene. She wears a meticulously 
+      tailored dark power suit, adorned with minimalist, high-end gold jewelry. 
+      Her expression is one of quiet supremacy and astute intelligence. Low-angle 
+      shot, focusing from her designer heels slowly ascending to her piercing gaze. 
+      DSLR photography, hyperrealistic, photoreal, maximum detail, crisp focus, 
+      intricate pore-level skin texture, subsurface scattering, realistic hair strands, 
+      fabric weave detail, metallic reflections, bokeh background, studio lighting, 
+      shot with Hasselblad H6D-400C, 80mm f/2.8 lens, ISO 400, f/4.0, 1/125s, 
+      natural skin tones, perfect exposure, film grain, commercial photography, 
+      ultra-detailed, photojournalism quality, award-winning portrait
+    negative_prompt: |
+      cartoon, illustration, painting, drawing, low quality, blurry, pixelated, deformed, distorted, 
+      text, watermark, signature, bad anatomy, bad hands, mutated fingers, poor lighting, 
+      ugly, disfigured, childish, simplistic, oversaturated, grayscale, cheap boat
     sd_settings:
-      model: "sd_xl_base_1.0.safetensors"
-      steps: 40
-      cfg: 8.0
-      sampler: "DPM++ 2M Karras"
-      seed: 12345
+      model: "black-forest-labs/flux-kontext-pro"
+      steps: 25
+      cfg: 4.0
+      sampler: "DPM++ 2M Karras" 
+      seed: 20160721
       width: 1024
       height: 1024
       hires_fix: true
+      # Note: Flux Kontext Pro doesn't support external LoRAs
+      # Photorealism achieved through optimized prompts and native model quality
     face_swap:
       source: "faces/your_face.png"
-      backend: "insightface"
+      backend: "kontext"
+      enabled: true
+    enhance: true
+    upscale: true 
+
+  luxury_car_domination_02:
+    prompt: |
+      High-resolution photorealistic RAW 8K photo of an attractive 30-year-old woman, 
+      standing commandingly beside a sleek, matte black luxury car (Rolls-Royce 
+      Phantom, Bugatti Chiron) in a private, minimalist, dimly lit garage. Volumetric 
+      light streaks pierce through the atmospheric haze, highlighting her powerful silhouette 
+      and the car's mirror-finish contours. She wears an exquisite, dark leather outfit 
+      with structured couture details. Her gaze is direct and unwavering, conveying absolute control. 
+      Wide establishing shot, emphasizing scale and power, cinematic composition, deep shadows, 
+      neon accent lighting from LED strips, professional automotive photography, 
+      shot with Phase One XF IQ4 150MP, 35mm f/3.5 lens, ISO 200, f/5.6, 1/60s, 
+      dramatic key lighting, specular highlights, realistic material reflections, 
+      pore-level skin detail, fabric texture, chrome reflections, commercial photography quality
+    negative_prompt: |
+      cartoon, low quality, blurry, distorted car, text, watermark, signature, bad anatomy, 
+      poor lighting, ugly, disfigured, toy car, cartoon car, messy background
+    sd_settings:
+      model: "black-forest-labs/flux-kontext-pro"
+      steps: 25
+      cfg: 4.0
+      sampler: "DPM++ 2M Karras"
+      seed: 20160721
+      width: 1024
+      height: 1024
+      hires_fix: true
+      # Note: Flux Kontext Pro doesn't support external LoRAs
+      # Photorealism achieved through optimized prompts and native model quality
+    face_swap:
+      source: "faces/your_face.png"
+      backend: "kontext"
+      enabled: true
+    enhance: true
+    upscale: true 
+
+  opulent_throne_figure_03:
+    prompt: |
+      Stunning photorealistic RAW 8K portrait of an attractive 30-year-old woman, 
+      seated on an ornate, gothic-inspired throne within a grand, darkly lit cathedral hall. 
+      Flickering candlelight from large candelabras creates dancing shadows that play across 
+      her regal features and the heavy, rich textures of her velvet gown with gold embroidery. 
+      Her expression is stern, unyielding, and utterly dominant. Slight high-angle 
+      shot looking down, emphasizing her authority and power. Cinematic composition, deep 
+      moody colors, intricate carved stone details, dramatic chiaroscuro lighting, 
+      atmospheric haze, shot with Canon EOS R5, 85mm f/1.4 lens, ISO 800, f/2.8, 1/100s, 
+      natural subsurface scattering, realistic fabric textures, stone carvings detail, 
+      gold leaf reflections, museum quality lighting, fine art portrait photography
+    negative_prompt: |
+      cartoon, illustration, painting, drawing, low quality, blurry, distorted, 
+      text, watermark, signature, bad anatomy, bad hands, poor lighting, ugly, 
+      simplistic throne, cheap materials
+    sd_settings:
+      model: "black-forest-labs/flux-kontext-pro"
+      steps: 25
+      cfg: 4.0
+      sampler: "DPM++ 2M Karras"
+      seed: 20160721
+      width: 1024
+      height: 1024
+      hires_fix: true
+      # Note: Flux Kontext Pro doesn't support external LoRAs
+      # Photorealism achieved through optimized prompts and native model quality
+    face_swap:
+      source: "faces/your_face.png"
+      backend: "kontext"
+      enabled: true
+    enhance: true
+    upscale: true 
+
+  money_vault_mistress_05:
+    prompt: |
+      Photorealistic RAW 8K photo of an attractive 30-year-old woman, standing 
+      imposingly inside a massive, dimly lit Swiss bank vault, surrounded by towering stacks 
+      of gold bars and overflowing bundles of currency. Soft, directed LED spotlights 
+      illuminate her powerful form, creating strong chiaroscuro shadows that emphasize her dominance. 
+      She wears a sleek, dark business suit with luxurious fur collar details. 
+      Her expression is calm, powerful, and possessive, eyes reflecting the golden light. 
+      Medium full-body shot, emphasizing her commanding scale against the immense wealth. 
+      Cinematic composition, rich metallic reflections, highly detailed currency textures, 
+      shot with Sony A7R V, 50mm f/1.8 lens, ISO 400, f/2.8, 1/80s, 
+      professional studio lighting, specular highlights on gold, realistic paper currency detail, 
+      subsurface skin scattering, fabric texture detail, commercial bank photography quality
+    negative_prompt: |
+      cartoon, illustration, painting, drawing, low quality, blurry, distorted money, 
+      text, watermark, signature, bad anatomy, bad hands, poor lighting, ugly, 
+      disfigured, simplistic vault, empty background, cartoonish money
+    sd_settings:
+      model: "black-forest-labs/flux-kontext-pro"
+      steps: 25
+      cfg: 4.0
+      sampler: "DPM++ 2M Karras"
+      seed: 20160721
+      width: 1024
+      height: 1024
+      hires_fix: true
+      # Note: Flux Kontext Pro doesn't support external LoRAs
+      # Photorealism achieved through optimized prompts and native model quality
+    face_swap:
+      source: "faces/your_face.png"
+      backend: "kontext"
+      enabled: true
     enhance: true
     upscale: true
-  - name: "jazz_band"
-    prompt: "A jazz band performing in a smoky club, 1950s style, high detail"
-    negative_prompt: "cartoon, lowres, text"
-    sd_settings:
-      model: "sd_xl_base_1.0.safetensors"
-      steps: 30
-      cfg: 7.5
-      sampler: "Euler a"
-      seed: 54321
-      width: 896
-      height: 1152
-      hires_fix: false
-    face_swap:
-      source: "faces/your_face.png"
-      backend: "insightface"
-    enhance: false
-    upscale: true 
+

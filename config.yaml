@@ -8,7 +8,7 @@ models_dir: models
 
 # Generation backend configuration
 generation:
-  backend: "insightface"
+  backend: "flux"  # Options: "insightface", "comfyui", "flux"
 
 # Mock generation parameters
 mock_generation:
@@ -28,6 +28,36 @@ sd_defaults:
   height: 1024
   hires_fix: true
 
-face_swap:
-  backend: "insightface"
-  model_path: "models/insightface/inswapper_128.onnx"
+# Face swapping handled natively by Flux Kontext Pro
+# No external face swap configuration needed
+
+# Note: LoRAs not supported by Flux Kontext Pro
+# Photorealism achieved through native model quality and enhanced prompts
+
+# Flux configuration for Replicate - Using Kontext Pro for Native Face Swapping
+flux:
+  model: "flux-kontext-pro"  # Native face swapping model
+  default_steps: 28  # Increased for better quality
+  default_guidance: 4.0  # Optimal for photorealism
+  output_quality: 100  # Maximum quality
+  safety_tolerance: 2  # More lenient for artistic content
+  aspect_ratio: "1:1"  # Square format
+  
+  # Face reference settings for Kontext Pro
+  face_reference:
+    enabled: true
+    default_path: "faces/your_face.png"
+    strength: 0.8  # Face influence strength
+  
+  # Advanced photorealism settings
+  photorealism:
+    skin_enhancement: true
+    detail_boost: 1.2
+    texture_sharpening: 0.8
+    color_grading: "natural"
+    contrast_boost: 0.3
+
+# Upscaling configuration
+upscale:
+  model: "real-esrgan"  # Options: "real-esrgan", "esrgan", "swinir"
+  scale: 2  # Upscaling factor (2 or 4)

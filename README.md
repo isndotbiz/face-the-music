@@ -121,7 +121,7 @@ prompts:
   - text: "a portrait of a person"
     face_swap:
       backend: "insightface"  # Override per prompt
-      source_face: "faces/person1.jpg"
+      source_face: "faces/your_face.png"
 ```
 
 #### Backend Comparison

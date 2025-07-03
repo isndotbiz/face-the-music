@@ -5,6 +5,44 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Environment and config
 .env
+.env.local
+.env.*.local
+
+# IDE and editor files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+temp_faces/
+*.tmp
+*.temp
+
+# Logs
+logs/
+*.log
+
+# Model files (large)
+*.onnx
+*.safetensors
+*.pt
+*.pth
+*.bin
+
+# Generated images (keep examples)
+output/temp_*
+output/.DS_Store

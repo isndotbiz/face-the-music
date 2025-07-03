@@ -1,0 +1,152 @@
+# SD Export and LoRA Enhancement Configuration
+# Configuration for Step 5: Export to Stable Diffusion and enhance with LoRAs
+
+sd_export:
+  # Output formats for SD-ready images
+  output_format: "safetensors"
+  checkpoint_format: "diffusers"
+  image_format: "png"
+  quality: 95
+  
+  # Image processing settings
+  resize_to_sd_compatible: true
+  target_dimensions: [1024, 1024]  # Width x Height (must be multiple of 64)
+  preserve_aspect_ratio: true
+
+face_matching:
+  # Face recognition thresholds
+  confidence_threshold: 0.6
+  max_faces_per_image: 5
+  face_size_threshold: 50
+  
+  # Face database settings
+  auto_build_database: true
+  database_path: "output/face_database.json"
+  reference_face_path: "faces/your_face.png"
+
+lora_enhancement:
+  # LoRA application settings
+  max_loras_per_image: 3
+  weight_adjustment_factor: 0.9
+  enhancement_strength: 0.7
+  
+  # Auto-selection criteria
+  auto_select_loras: true
+  confidence_based_selection: true
+  image_analysis_based_selection: true
+
+stable_diffusion:
+  # SD model configuration
+  model_id: "stabilityai/stable-diffusion-xl-base-1.0"
+  steps: 20
+  guidance_scale: 7.5
+  strength: 0.35
+  
+  # Performance settings
+  use_cuda: true
+  torch_dtype: "float16"
+  use_safetensors: true
+  enable_attention_slicing: true
+
+# LoRA Models Configuration
+available_loras:
+  photorealism:
+    - name: "PhotoReal XL Pro"
+      path: "loras/photoreal_xl_pro.safetensors"
+      weight: 0.75
+      compatibility_score: 0.95
+      description: "Ultra-realistic photorealism enhancement"
+    
+  skin_texture:
+    - name: "Hyper-Detailed Skin Texture"
+      path: "loras/skin_texture_detail.safetensors"  
+      weight: 0.65
+      compatibility_score: 0.90
+      description: "Enhanced skin texture and pore detail"
+    
+  lighting:
+    - name: "Professional Portrait Lighting"
+      path: "loras/portrait_lighting_pro.safetensors"
+      weight: 0.55
+      compatibility_score: 0.85
+      description: "Professional studio lighting effects"
+      
+    - name: "Cinematic Lighting"
+      path: "loras/cinematic_lighting.safetensors"
+      weight: 0.60
+      compatibility_score: 0.82
+      description: "Cinematic lighting and atmosphere"
+    
+  detail_enhancement:
+    - name: "Ultra Sharp Details"
+      path: "loras/ultra_sharp_details.safetensors"
+      weight: 0.50
+      compatibility_score: 0.88
+      description: "Enhanced detail sharpness and clarity"
+      
+    - name: "High Definition Enhancement"
+      path: "loras/hd_enhancement.safetensors"
+      weight: 0.45
+      compatibility_score: 0.85
+      description: "Overall image quality and definition boost"
+  
+  color_grading:
+    - name: "Cinematic Color Grading"
+      path: "loras/cinematic_grading.safetensors"
+      weight: 0.60
+      compatibility_score: 0.80
+      description: "Cinematic color enhancement and grading"
+      
+    - name: "Professional Color Enhancement"
+      path: "loras/professional_colors.safetensors"
+      weight: 0.55
+      compatibility_score: 0.83
+      description: "Professional color accuracy and vibrancy"
+
+# Processing Pipelines
+processing_pipelines:
+  high_quality:
+    description: "Maximum quality processing with all enhancements"
+    face_matching_threshold: 0.8
+    max_loras: 4
+    enhancement_strength: 0.8
+    
+  balanced:
+    description: "Balanced quality and speed"
+    face_matching_threshold: 0.6
+    max_loras: 3
+    enhancement_strength: 0.7
+    
+  fast:
+    description: "Quick processing with essential enhancements only"
+    face_matching_threshold: 0.5
+    max_loras: 2
+    enhancement_strength: 0.6
+
+# Output Directory Structure
+output_structure:
+  base_dir: "output/sd_export"
+  subdirectories:
+    - "checkpoints"
+    - "enhanced_images" 
+    - "face_matches"
+    - "metadata"
+    - "reports"
+    - "sd_ready_images"
+    - "lora_applied"
+
+# Quality Control
+quality_control:
+  enable_quality_checks: true
+  minimum_face_confidence: 0.4
+  maximum_processing_time: 300  # seconds
+  verify_output_integrity: true
+  generate_comparison_images: true
+
+# Logging and Reporting
+logging:
+  level: "INFO"
+  log_file: "logs/sd_export.log"
+  console_output: true
+  detailed_reports: true
+  save_processing_metadata: true

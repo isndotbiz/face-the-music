@@ -1,0 +1,64 @@
+{
+  "workflow_summary": {
+    "version": "2.0-OPTIMAL",
+    "success": true,
+    "total_time": 7.468045949935913,
+    "original_size": [
+      2048,
+      2048
+    ],
+    "final_size": [
+      1024,
+      1024
+    ]
+  },
+  "stages": [
+    {
+      "stage": "Stage 1",
+      "success": true,
+      "processing_time": 6.834923028945923,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 2",
+      "success": true,
+      "processing_time": 0.08413195610046387,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 3",
+      "success": true,
+      "processing_time": 0.21041226387023926,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 4",
+      "success": true,
+      "processing_time": 0.23870491981506348,
+      "output_size": [
+        1024,
+        1024
+      ]
+    }
+  ],
+  "quality_metrics": {
+    "structural_similarity": 0.11848571576530137,
+    "enhancement_quality": 0.85,
+    "processing_efficiency": 0.9
+  },
+  "intermediate_outputs": {
+    "stage1": "output/stage1_flux_kontext/luxury_batch_004_mediterranean_beach_yacht_02_stage1.png",
+    "stage2": "output/stage2_sdxl_lora/luxury_batch_004_mediterranean_beach_yacht_02_stage2_lora.png",
+    "stage3": "output/stage3_enhanced/luxury_batch_004_mediterranean_beach_yacht_02_stage3_enhanced.png"
+  },
+  "errors": []
+}

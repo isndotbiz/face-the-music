@@ -1,0 +1,64 @@
+{
+  "workflow_summary": {
+    "version": "2.0-OPTIMAL",
+    "success": true,
+    "total_time": 8.005539655685425,
+    "original_size": [
+      2048,
+      2048
+    ],
+    "final_size": [
+      1024,
+      1024
+    ]
+  },
+  "stages": [
+    {
+      "stage": "Stage 1",
+      "success": true,
+      "processing_time": 7.362335920333862,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 2",
+      "success": true,
+      "processing_time": 0.08479690551757812,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 3",
+      "success": true,
+      "processing_time": 0.21012401580810547,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 4",
+      "success": true,
+      "processing_time": 0.24322223663330078,
+      "output_size": [
+        1024,
+        1024
+      ]
+    }
+  ],
+  "quality_metrics": {
+    "structural_similarity": 0.1485516589603181,
+    "enhancement_quality": 0.85,
+    "processing_efficiency": 0.9
+  },
+  "intermediate_outputs": {
+    "stage1": "output/stage1_flux_kontext/luxury_batch_009_test_flux_kontext_upscaled_1751502690_stage1.png",
+    "stage2": "output/stage2_sdxl_lora/luxury_batch_009_test_flux_kontext_upscaled_1751502690_stage2_lora.png",
+    "stage3": "output/stage3_enhanced/luxury_batch_009_test_flux_kontext_upscaled_1751502690_stage3_enhanced.png"
+  },
+  "errors": []
+}

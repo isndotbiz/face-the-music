@@ -1,0 +1,178 @@
+{
+  "batch_summary": {
+    "total_images": 11,
+    "successful": 11,
+    "failed": 0,
+    "success_rate": 100.0,
+    "total_processing_time": 96.13136339187622,
+    "average_time_per_image": 8.73921485380693,
+    "average_quality_score": 0.1951406206268236,
+    "average_size_improvement": 1.0888671875
+  },
+  "successful_results": [
+    {
+      "input_file": "flux_input_luxury_batch_001_coastal_marina_yacht_05.png",
+      "output_file": "luxury_batch_001_flux_input_luxury_batch_001_coastal_marina_yacht_05_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 10.421104907989502,
+      "quality_score": 0.21681008963035087
+    },
+    {
+      "input_file": "flux_input_luxury_batch_002_dominant_chamber_portrait_01.png",
+      "output_file": "luxury_batch_002_flux_input_luxury_batch_002_dominant_chamber_portrait_01_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 10.319745779037476,
+      "quality_score": 0.24348370878181314
+    },
+    {
+      "input_file": "flux_input_luxury_batch_003_luxury_car_domination_02.png",
+      "output_file": "luxury_batch_003_flux_input_luxury_batch_003_luxury_car_domination_02_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 8.689258098602295,
+      "quality_score": 0.21868943262501814
+    },
+    {
+      "input_file": "flux_input_luxury_batch_004_mediterranean_beach_yacht_02.png",
+      "output_file": "luxury_batch_004_flux_input_luxury_batch_004_mediterranean_beach_yacht_02_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 7.9689249992370605,
+      "quality_score": 0.1608745375836444
+    },
+    {
+      "input_file": "flux_input_luxury_batch_005_money_vault_mistress_05.png",
+      "output_file": "luxury_batch_005_flux_input_luxury_batch_005_money_vault_mistress_05_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 8.399991035461426,
+      "quality_score": 0.18993243170398905
+    },
+    {
+      "input_file": "flux_input_luxury_batch_006_opulent_throne_figure_03.png",
+      "output_file": "luxury_batch_006_flux_input_luxury_batch_006_opulent_throne_figure_03_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 10.266235828399658,
+      "quality_score": 0.22380105052791757
+    },
+    {
+      "input_file": "flux_input_luxury_batch_007_sunset_coastal_yacht_03.png",
+      "output_file": "luxury_batch_007_flux_input_luxury_batch_007_sunset_coastal_yacht_03_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 8.11584997177124,
+      "quality_score": 0.18409446242528127
+    },
+    {
+      "input_file": "flux_input_luxury_batch_008_test_flux_kontext_1751502690.png",
+      "output_file": "luxury_batch_008_flux_input_luxury_batch_008_test_flux_kontext_1751502690_final_optimal.png",
+      "original_size": [
+        1024,
+        1024
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 7.683934926986694,
+      "quality_score": 0.16562720892601823
+    },
+    {
+      "input_file": "flux_input_luxury_batch_009_test_flux_kontext_upscaled_1751502690.png",
+      "output_file": "luxury_batch_009_flux_input_luxury_batch_009_test_flux_kontext_upscaled_1751502690_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 8.160398006439209,
+      "quality_score": 0.17519678915283654
+    },
+    {
+      "input_file": "flux_input_luxury_batch_010_yacht_luxury_deck_01.png",
+      "output_file": "luxury_batch_010_flux_input_luxury_batch_010_yacht_luxury_deck_01_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 7.753631830215454,
+      "quality_score": 0.16685011677286157
+    },
+    {
+      "input_file": "flux_input_test_optimal.png",
+      "output_file": "luxury_batch_011_flux_input_test_optimal_final_optimal.png",
+      "original_size": [
+        1440,
+        1440
+      ],
+      "final_size": [
+        1440,
+        1440
+      ],
+      "processing_time": 8.352288007736206,
+      "quality_score": 0.2011869987653289
+    }
+  ],
+  "failed_results": [],
+  "workflow_configuration": {
+    "flux_height_limit": 1440,
+    "stages": [
+      "Flux Kontext Pro Face Swap",
+      "SDXL + Photorealism LoRAs",
+      "Intelligent Enhancement & Upscaling",
+      "Professional Post-Processing"
+    ]
+  }
+}

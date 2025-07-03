@@ -1,0 +1,64 @@
+{
+  "workflow_summary": {
+    "version": "2.0-OPTIMAL",
+    "success": true,
+    "total_time": 8.689258098602295,
+    "original_size": [
+      1440,
+      1440
+    ],
+    "final_size": [
+      1440,
+      1440
+    ]
+  },
+  "stages": [
+    {
+      "stage": "Stage 1",
+      "success": true,
+      "processing_time": 7.797023057937622,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 2",
+      "success": true,
+      "processing_time": 0.0866093635559082,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 3",
+      "success": true,
+      "processing_time": 0.27400970458984375,
+      "output_size": [
+        1440,
+        1440
+      ]
+    },
+    {
+      "stage": "Stage 4",
+      "success": true,
+      "processing_time": 0.42862582206726074,
+      "output_size": [
+        1440,
+        1440
+      ]
+    }
+  ],
+  "quality_metrics": {
+    "structural_similarity": 0.21868943262501814,
+    "enhancement_quality": 0.85,
+    "processing_efficiency": 0.9
+  },
+  "intermediate_outputs": {
+    "stage1": "output/stage1_flux_kontext/luxury_batch_003_flux_input_luxury_batch_003_luxury_car_domination_02_stage1.png",
+    "stage2": "output/stage2_sdxl_lora/luxury_batch_003_flux_input_luxury_batch_003_luxury_car_domination_02_stage2_lora.png",
+    "stage3": "output/stage3_enhanced/luxury_batch_003_flux_input_luxury_batch_003_luxury_car_domination_02_stage3_enhanced.png"
+  },
+  "errors": []
+}

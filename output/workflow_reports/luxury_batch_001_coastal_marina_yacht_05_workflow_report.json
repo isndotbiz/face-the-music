@@ -1,0 +1,64 @@
+{
+  "workflow_summary": {
+    "version": "2.0-OPTIMAL",
+    "success": true,
+    "total_time": 9.58271598815918,
+    "original_size": [
+      2048,
+      2048
+    ],
+    "final_size": [
+      1024,
+      1024
+    ]
+  },
+  "stages": [
+    {
+      "stage": "Stage 1",
+      "success": true,
+      "processing_time": 8.71469521522522,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 2",
+      "success": true,
+      "processing_time": 0.08696222305297852,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 3",
+      "success": true,
+      "processing_time": 0.20640087127685547,
+      "output_size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "stage": "Stage 4",
+      "success": true,
+      "processing_time": 0.25431275367736816,
+      "output_size": [
+        1024,
+        1024
+      ]
+    }
+  ],
+  "quality_metrics": {
+    "structural_similarity": 0.16447486372776016,
+    "enhancement_quality": 0.85,
+    "processing_efficiency": 0.9
+  },
+  "intermediate_outputs": {
+    "stage1": "output/stage1_flux_kontext/luxury_batch_001_coastal_marina_yacht_05_stage1.png",
+    "stage2": "output/stage2_sdxl_lora/luxury_batch_001_coastal_marina_yacht_05_stage2_lora.png",
+    "stage3": "output/stage3_enhanced/luxury_batch_001_coastal_marina_yacht_05_stage3_enhanced.png"
+  },
+  "errors": []
+}

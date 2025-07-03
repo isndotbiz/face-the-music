@@ -1,0 +1,49 @@
+{
+  "active_errors": {
+    "9ba5976d": {
+      "id": "9ba5976d",
+      "error_type": "FileNotFoundError",
+      "error_message": "Demo file not found error",
+      "location": "demo_context_block",
+      "severity": "MEDIUM",
+      "first_seen": "2025-07-03T04:07:53.766285Z",
+      "last_seen": "2025-07-03T04:07:53.766288Z",
+      "occurrences": 1,
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/jonathanmallinger/Projects/face-the-music/error_tracker.py\", line 345, in error_tracking_context\n    yield\n  File \"/Users/jonathanmallinger/Projects/face-the-music/demo_error_tracking.py\", line 45, in demo_error_tracking\n    raise FileNotFoundError(\"Demo file not found error\")\nFileNotFoundError: Demo file not found error\n",
+      "status": "ACTIVE",
+      "added_to_todo": true
+    },
+    "e5f25faa": {
+      "id": "e5f25faa",
+      "error_type": "FileNotFoundError",
+      "error_message": "Input image file not found: nonexistent_image.jpg",
+      "location": "file_validation",
+      "severity": "HIGH",
+      "first_seen": "2025-07-03T04:08:57.490783Z",
+      "last_seen": "2025-07-03T04:08:57.490906Z",
+      "occurrences": 1,
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/jonathanmallinger/Projects/face-the-music/error_tracker.py\", line 345, in error_tracking_context\n    yield\n  File \"/Users/jonathanmallinger/Projects/face-the-music/flux_kontext_with_tracking.py\", line 100, in demo_real_pipeline\n    raise FileNotFoundError(\"Input image file not found: nonexistent_image.jpg\")\nFileNotFoundError: Input image file not found: nonexistent_image.jpg\n",
+      "status": "ACTIVE",
+      "added_to_todo": true
+    }
+  },
+  "fixed_errors": {
+    "8c06b4bf": {
+      "id": "8c06b4bf",
+      "error_type": "ValueError",
+      "error_message": "This is a demo error to show automatic tracking",
+      "location": "demo_function",
+      "severity": "HIGH",
+      "first_seen": "2025-07-03T04:07:53.765126Z",
+      "last_seen": "2025-07-03T04:07:53.765246Z",
+      "occurrences": 1,
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/jonathanmallinger/Projects/face-the-music/error_tracker.py\", line 325, in wrapper\n    return func(*args, **kwargs)\n  File \"/Users/jonathanmallinger/Projects/face-the-music/demo_error_tracking.py\", line 31, in problematic_function\n    raise ValueError(\"This is a demo error to show automatic tracking\")\nValueError: This is a demo error to show automatic tracking\n",
+      "status": "FIXED",
+      "added_to_todo": true,
+      "fixed_date": "2025-07-03T04:08:12.097796Z",
+      "fix_description": "Resolved demo error - removed test code"
+    }
+  },
+  "error_count": 3,
+  "last_updated": "2025-07-03T04:08:57.491595Z"
+}

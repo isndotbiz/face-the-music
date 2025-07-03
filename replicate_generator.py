@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 import time
 from typing import Optional, Dict, Any
+from error_tracker import track_errors, error_tracking_context
 
 
 class ReplicateFluxGenerator:
@@ -37,6 +38,7 @@ class ReplicateFluxGenerator:
             'upscaler': 'tencentarc/gfpgan'
         }
         
+    @track_errors(context="flux_image_generation", severity="HIGH")
     def generate_image(self, 
                       prompt: str, 
                       negative_prompt: str = "", 
@@ -46,7 +48,6 @@ class ReplicateFluxGenerator:
                       guidance_scale: float = 0.0,
                       seed: int = None,
                       model: str = 'flux-schnell',
-                      loras: list = None,
                       reference_image_path: str = None) -> Optional[Image.Image]:
         """
         Generate an image using Replicate Flux.
@@ -90,8 +91,7 @@ class ReplicateFluxGenerator:
             
             # Note: Flux Kontext Pro doesn't support LoRAs
             # Photorealism achieved through native model quality and optimized prompts
-            if loras and len(loras) > 0:
-                print(f"ℹ️ Note: {len(loras)} LoRAs configured but Flux Kontext Pro doesn't support external LoRAs")
+            # LoRAs should only be used in Stage 3 (SDXL) for photorealism enhancement
             
             # Add seed if provided
             if seed and seed != -1:
@@ -155,6 +155,7 @@ class ReplicateFluxGenerator:
             print(f"❌ Error generating image with Flux: {e}")
             return None
     
+    @track_errors(context="image_upscaling", severity="MEDIUM")
     def upscale_image(self, 
                      image: Image.Image, 
                      scale: int = 2, 
@@ -244,6 +245,7 @@ class ReplicateFluxGenerator:
             print("⚠️ Returning original image")
             return image
     
+    @track_errors(context="flux_workflow", severity="HIGH")
     def generate_with_face_swap_and_upscale(self,
                                           prompt: str,
                                           face_source_path: str,
@@ -277,8 +279,8 @@ class ReplicateFluxGenerator:
             # Use flux-kontext-pro for native face swapping
             flux_model = config.get('flux', {}).get('model', 'flux-kontext-pro')
             
-            # Extract LoRAs from sd_settings
-            loras = sd_settings.get('loras', [])
+            # Note: LoRAs are NOT used in Flux generation (Stage 1)
+            # LoRAs are applied later in Stage 3 (SDXL) for photorealism enhancement
             
             # Use face reference if available and using Kontext Pro
             reference_image = None
@@ -294,7 +296,6 @@ class ReplicateFluxGenerator:
                 guidance_scale=guidance_scale,
                 seed=seed,
                 model=flux_model,
-                loras=loras,
                 reference_image_path=reference_image
             )
             

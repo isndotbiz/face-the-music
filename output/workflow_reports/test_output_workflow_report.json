@@ -1,0 +1,64 @@
+{
+  "workflow_summary": {
+    "version": "2.0-OPTIMAL",
+    "success": true,
+    "total_time": 1.7032239437103271,
+    "original_size": [
+      1440,
+      1440
+    ],
+    "final_size": [
+      1440,
+      1440
+    ]
+  },
+  "stages": [
+    {
+      "stage": "Stage 1",
+      "success": true,
+      "processing_time": 0.31268906593322754,
+      "output_size": [
+        1440,
+        1440
+      ]
+    },
+    {
+      "stage": "Stage 2",
+      "success": true,
+      "processing_time": 0.15776705741882324,
+      "output_size": [
+        1440,
+        1440
+      ]
+    },
+    {
+      "stage": "Stage 3",
+      "success": true,
+      "processing_time": 0.3824617862701416,
+      "output_size": [
+        1440,
+        1440
+      ]
+    },
+    {
+      "stage": "Stage 4",
+      "success": true,
+      "processing_time": 0.5245389938354492,
+      "output_size": [
+        1440,
+        1440
+      ]
+    }
+  ],
+  "quality_metrics": {
+    "structural_similarity": 0.6122694178955131,
+    "enhancement_quality": 0.85,
+    "processing_efficiency": 0.9
+  },
+  "intermediate_outputs": {
+    "stage1": "output/stage1_flux_kontext/test_output_stage1_fallback.png",
+    "stage2": "output/stage1_flux_kontext/test_output_stage2_resized.png",
+    "stage3": "output/stage2_sdxl_lora/test_output_stage3_sdxl_lora.png"
+  },
+  "errors": []
+}

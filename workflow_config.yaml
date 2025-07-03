@@ -23,6 +23,10 @@ agent_workflow:
       color_science:
         skin_tone_accuracy: 0.98
         natural_chromatic_adaptation: true
+      
+      # LoRA is explicitly disabled in Stage 1
+      apply_loras: false  # No LoRAs on Flux
+      photorealism_method: "none"
     
     advanced_parameters:
       facial_landmark_precision: "sub-pixel"

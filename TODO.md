@@ -9,7 +9,13 @@
 ## 🎯 Current Priority Tasks
 
 ### HIGH PRIORITY
-- [ ] **Fix Flux Model Version Issue**
+- [ ] **Fix Error e5f25faa** [HIGH]
+  - **Type**: FileNotFoundError
+  - **Message**: Input image file not found: nonexistent_image.jpg
+  - **Location**: file_validation
+  - **First Seen**: 2025-07-03
+  - **Occurrences**: 1
+  - **Auto-tracked error** - Fix and run `python3 error_tracker.py fix e5f25faa`
   - Current error: `Invalid model_version: black-forest-labs/flux-kontext-pro`
   - Need to update to correct model version format `owner/name:version`
   - Test with proper Flux Kontext Pro model endpoint
@@ -25,6 +31,13 @@
   - Test with various input image sizes
 
 ### MEDIUM PRIORITY
+- [ ] **Fix Error 9ba5976d** [MEDIUM]
+  - **Type**: FileNotFoundError
+  - **Message**: Demo file not found error
+  - **Location**: demo_context_block
+  - **First Seen**: 2025-07-03
+  - **Occurrences**: 1
+  - **Auto-tracked error** - Fix and run `python3 error_tracker.py fix 9ba5976d`
 - [ ] **Documentation Updates**
   - Update API endpoint references in code
   - Add troubleshooting guide for common Flux errors

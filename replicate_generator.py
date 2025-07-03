@@ -14,9 +14,9 @@ class ReplicateFluxGenerator:
     
     def __init__(self, api_key: str = None):
         """Initialize the Replicate Flux generator."""
-        self.api_key = api_key or os.getenv('REPLICATE_API_KEY')
+        self.api_key = api_key or os.getenv('REPLICATE_API_TOKEN') or os.getenv('REPLICATE_API_KEY')
         if not self.api_key:
-            raise ValueError("Replicate API key is required. Set REPLICATE_API_KEY environment variable.")
+            raise ValueError("Replicate API key is required. Set REPLICATE_API_TOKEN environment variable.")
         
         # Set the API key for replicate
         os.environ['REPLICATE_API_TOKEN'] = self.api_key

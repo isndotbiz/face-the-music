@@ -1,0 +1,65 @@
+balanced:
+  description: Good quality with reasonable processing time
+  name: Balanced
+  stages:
+    stage1:
+      quality: high
+      steps: 50
+    stage2:
+      enhance: true
+      scale: 2
+    stage3:
+      steps: 4
+      strength: 0.35
+    stage4:
+      color_grading: true
+      film_grain: false
+cinema_grade:
+  description: Professional cinema quality with all enhancements
+  name: Cinema Grade
+  stages:
+    stage1:
+      quality: cinema
+      steps: 100
+    stage2:
+      enhance: true
+      scale: 4
+    stage3:
+      steps: 12
+      strength: 0.2
+    stage4:
+      color_grading: true
+      film_grain: true
+      hdr: true
+fast:
+  description: Quick results for testing and previews
+  name: Fast Processing
+  stages:
+    stage1:
+      quality: standard
+      steps: 25
+    stage2:
+      enhance: false
+      scale: 2
+    stage3:
+      steps: 2
+      strength: 0.45
+    stage4:
+      color_grading: false
+      film_grain: false
+ultra_quality:
+  description: Maximum quality, longer processing time
+  name: Ultra Quality
+  stages:
+    stage1:
+      quality: maximum
+      steps: 75
+    stage2:
+      enhance: true
+      scale: 4
+    stage3:
+      steps: 8
+      strength: 0.25
+    stage4:
+      color_grading: true
+      film_grain: true

@@ -1,10 +1,8 @@
 # Core AI and Image Processing
 replicate>=0.15.0
 Pillow>=10.0.0
-Pillow-SIMD>=9.0.0
 opencv-python>=4.8.0
 numpy>=1.24.0
-scipy>=1.11.0
 
 # Configuration and Data Handling
 PyYAML>=6.0
@@ -15,20 +13,13 @@ rich>=13.5.0
 typer>=0.9.0
 python-dotenv>=1.0.0
 
-# Image Enhancement and Color Science
-colour-science>=0.4.0
+# Image Enhancement and Processing
 scikit-image>=0.21.0
-imageio>=2.31.0
+imageio>=2.37.0
 
-# Real-ESRGAN and Upscaling
-real-esrgan>=0.2.5
-torch>=2.0.0
-torchvision>=0.15.0
-
-# Stable Diffusion and ControlNet
-diffusers>=0.21.0
-transformers>=4.33.0
-accelerate>=0.21.0
+# PyTorch (for GPU acceleration, optional)
+torch>=2.0.0 ; python_version < "3.13"
+torchvision>=0.15.0 ; python_version < "3.13"
 
 # Post-processing and Quality Verification
 psutil>=5.9.0
@@ -36,6 +27,3 @@ colorama>=0.4.6
 
 # Development and Testing
 pytest>=7.4.0
-black>=23.7.0
-flake8>=6.0.0
-isort>=5.12.0

@@ -25,7 +25,10 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from rich.table import Table
 from rich.panel import Panel
 from rich import print as rprint
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 import psutil
 import gc
 
@@ -156,8 +159,8 @@ class ProfessionalPipeline:
             "CPU Cores": cpu_count,
             "Total RAM": f"{memory.total / (1024**3):.1f} GB",
             "Available RAM": f"{memory.available / (1024**3):.1f} GB",
-            "CUDA Available": torch.cuda.is_available() if 'torch' in sys.modules else False,
-            "GPU Count": torch.cuda.device_count() if torch.cuda.is_available() else 0
+            "CUDA Available": torch.cuda.is_available() if torch and hasattr(torch, 'cuda') else False,
+            "GPU Count": torch.cuda.device_count() if torch and torch.cuda.is_available() else 0
         }
         
         self.logger.info("🖥️  System Information:")
@@ -293,17 +296,16 @@ class ProfessionalPipeline:
             # Configure Flux Kontext Pro with professional settings
             flux_config = self.config['agent_workflow']['stage_1_face_detection_and_swap']['configuration']
             
-            # Call Flux Kontext Pro API
+            # Call Flux Kontext Pro API (use the working model)
             output = self.replicate_client.run(
-                "lucataco/flux-dev-multi-lora",
+                "kxxt0/flux-dev-controlnet-union",
                 input={
                     "prompt": enhanced_prompt,
                     "face_image": open(face_path, "rb"),
                     "width": 2048,
                     "height": 2048,
                     "guidance_scale": 7.5,
-                    "num_inference_steps": 50,
-                    "face_swap_strength": flux_config['face_matching']['confidence_threshold']
+                    "num_inference_steps": 25  # Faster for testing
                 }
             )
             

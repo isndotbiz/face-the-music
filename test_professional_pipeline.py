@@ -11,6 +11,10 @@ import os
 import sys
 import time
 from pathlib import Path
+try:
+    import yaml
+except ImportError:
+    yaml = None
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -21,24 +25,48 @@ def test_imports():
     """Test that all required imports work"""
     console.print("🔍 Testing imports...")
     
-    try:
-        import yaml
-        import replicate
-        from PIL import Image, ImageEnhance, ImageFilter
-        import numpy as np
-        import cv2
-        from rich.console import Console
-        from rich.progress import Progress
-        import torch
-        import psutil
-        import click
-        
+    required_modules = [
+        ('yaml', 'PyYAML'),
+        ('replicate', 'replicate'),
+        ('PIL', 'Pillow'),
+        ('numpy', 'numpy'),
+        ('cv2', 'opencv-python'),
+        ('rich', 'rich'),
+        ('click', 'click'),
+        ('psutil', 'psutil')
+    ]
+    
+    optional_modules = [
+        ('torch', 'torch'),
+    ]
+    
+    missing_required = []
+    missing_optional = []
+    
+    # Test required modules
+    for module_name, package_name in required_modules:
+        try:
+            __import__(module_name)
+        except ImportError:
+            missing_required.append(package_name)
+    
+    # Test optional modules
+    for module_name, package_name in optional_modules:
+        try:
+            __import__(module_name)
+        except ImportError:
+            missing_optional.append(package_name)
+    
+    if missing_required:
+        console.print(f"[red]❌ Missing required packages: {', '.join(missing_required)}[/red]")
+        return False
+    elif missing_optional:
+        console.print(f"[yellow]⚠️  Missing optional packages: {', '.join(missing_optional)} (GPU features disabled)[/yellow]")
+        console.print("[green]✅ All required imports successful[/green]")
+        return True
+    else:
         console.print("[green]✅ All imports successful[/green]")
         return True
-        
-    except ImportError as e:
-        console.print(f"[red]❌ Import failed: {e}[/red]")
-        return False
 
 def test_configuration():
     """Test configuration file loading"""

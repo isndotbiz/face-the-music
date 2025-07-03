@@ -1,0 +1,7 @@
+agent_workflow:
+  logging_and_monitoring:
+    log_level: INFO
+  stage_1_face_detection_and_swap:
+    configuration:
+      face_matching:
+        confidence_threshold: 0.95

@@ -1,326 +1,310 @@
+#!/usr/bin/env python3
+"""
+Face The Music - Clean Image Generation Script
+Using only Flux Kontext Pro with native face swapping
+
+Version: 2.1-PROFESSIONAL  
+Author: Face The Music Team
+"""
+
 import os
 import sys
 import yaml
 import typer
 from dotenv import load_dotenv
-from rich.progress import Progress
-from comfyui_api import ComfyUIAPI
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.console import Console
+from rich.panel import Panel
 from PIL import Image, ImageDraw, ImageOps
-# Face swapping now handled natively by Flux Kontext Pro
 from replicate_generator import ReplicateFluxGenerator
+from pathlib import Path
+import time
 
+console = Console()
 app = typer.Typer()
 
-# Define constant for temporary face directory
-PREPARED_FACE_DIR = None  # Will be set in main() after output_dir is determined
-
-def load_config(config_path: str = 'config.yaml', cli_backend: str = None):
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
-    
-    # Allow environment variable overrides for face_swap settings
-    if 'face_swap' in config:
-        config['face_swap']['backend'] = os.getenv('FACE_SWAP_BACKEND', config['face_swap']['backend'])
-        config['face_swap']['model_path'] = os.getenv('FACE_SWAP_MODEL_PATH', config['face_swap']['model_path'])
-
-    # Override generation backend with CLI flag if provided
-    if cli_backend is not None:
-        config['generation']['backend'] = cli_backend
-
-    return config
-
-def load_prompts(prompts_path: str):
-    with open(prompts_path, 'r') as f:
-        return yaml.safe_load(f)
-
-def save_image(image_data, output_path):
-    # Ensure output path has .png extension
-    if not output_path.lower().endswith('.png'):
-        output_path = os.path.splitext(output_path)[0] + '.png'
-    
-    # If image_data is PIL Image, save as PNG
-    if hasattr(image_data, 'save'):
-        image_data.save(output_path, format='PNG')
-    else:
-        # If it's raw bytes, write directly (assuming it's already PNG format)
-        with open(output_path, 'wb') as f:
-            f.write(image_data)
-
-def prepare_source_face_image(source_path: str, temp_dir: str) -> str:
-    # Load image
-    img = Image.open(source_path)
-    
-    # Convert to RGB with white background for better face detection
-    if img.mode in ('RGBA', 'P'):
-        # Create white background
-        background = Image.new('RGB', img.size, (255, 255, 255))
-        if img.mode == 'P':
-            img = img.convert('RGBA')
-        # Paste with transparency support
-        background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-        img = background
-    elif img.mode != 'RGB':
-        img = img.convert('RGB')
-    
-    # Create square canvas (RGB with white background)
-    size = 1024
-    canvas = Image.new("RGB", (size, size), (255, 255, 255))
-    
-    # Center source on canvas with scaling
-    img.thumbnail((size, size), Image.LANCZOS)
-    x = (size - img.width) // 2
-    y = (size - img.height) // 2
-    canvas.paste(img, (x, y))
-    
-    # Save prepared image
-    filename = os.path.splitext(os.path.basename(source_path))[0] + "_prep.png"
-    out_path = os.path.join(temp_dir, filename)
-    canvas.save(out_path, format="PNG")
-    return out_path
-
-def generate_with_comfyui(api, img, config, name):
-    """Generate image using ComfyUI workflow."""
-    prompt = img.get('prompt', '')
-    negative_prompt = img.get('negative_prompt', '')
-    sd_settings = config['sd_defaults'].copy()
-    sd_settings.update(img.get('sd_settings', {}))
-    face_swap_path = img.get('face_swap', {}).get('source')
-    enhance = img.get('enhance', False)
-    upscale = img.get('upscale', False)
-    
-    workflow = api.load_workflow()
-    workflow = api.inject_prompts(workflow, prompt, negative_prompt, sd_settings, face_swap_path, enhance, upscale)
-    result = api.post_workflow(workflow)
-    
-    if not result:
-        return None
-    
-    # Return the result for further processing
-    return result
-
-def generate_with_flux(img, config, name):
-    """Generate image using Replicate Flux with face swap and upscaling."""
+def load_config(config_path: str = 'config.yaml') -> dict:
+    """Load configuration from YAML file"""
     try:
-        # Initialize Flux generator
-        flux_generator = ReplicateFluxGenerator()
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
+        return config
+    except FileNotFoundError:
+        console.print(f"[red]❌ Config file not found: {config_path}[/red]")
+        sys.exit(1)
+    except yaml.YAMLError as e:
+        console.print(f"[red]❌ Invalid YAML in config: {e}[/red]")
+        sys.exit(1)
+
+def load_prompts(prompts_path: str) -> dict:
+    """Load prompts from YAML file"""
+    try:
+        with open(prompts_path, 'r') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        console.print(f"[red]❌ Prompts file not found: {prompts_path}[/red]")
+        sys.exit(1)
+    except yaml.YAMLError as e:
+        console.print(f"[red]❌ Invalid YAML in prompts: {e}[/red]")
+        sys.exit(1)
+
+def prepare_face_image(source_path: str, temp_dir: str) -> str:
+    """Prepare source face image for optimal face swapping"""
+    if not os.path.exists(source_path):
+        console.print(f"[red]❌ Face image not found: {source_path}[/red]")
+        return None
+        
+    try:
+        # Load and process image
+        img = Image.open(source_path)
+        
+        # Convert to RGB with white background
+        if img.mode in ('RGBA', 'P'):
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+            img = background
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Create 1024x1024 canvas for optimal face detection
+        size = 1024
+        canvas = Image.new("RGB", (size, size), (255, 255, 255))
+        
+        # Center and scale image
+        img.thumbnail((size, size), Image.Resampling.LANCZOS)
+        x = (size - img.width) // 2
+        y = (size - img.height) // 2
+        canvas.paste(img, (x, y))
+        
+        # Save prepared image
+        os.makedirs(temp_dir, exist_ok=True)
+        filename = f"{Path(source_path).stem}_1024_prepared.png"
+        out_path = os.path.join(temp_dir, filename)
+        canvas.save(out_path, format="PNG")
+        
+        console.print(f"[green]✅ Face image prepared: {out_path}[/green]")
+        return out_path
+        
+    except Exception as e:
+        console.print(f"[red]❌ Error preparing face image: {e}[/red]")
+        return None
+
+def generate_with_flux(image_config: dict, config: dict, name: str, flux_generator: ReplicateFluxGenerator) -> Image.Image:
+    """Generate image using Flux Kontext Pro with native face swapping"""
+    try:
+        console.print(f"[cyan]🎨 Generating {name} with Flux Kontext Pro...[/cyan]")
         
         # Get configuration
-        prompt = img.get('prompt', '')
-        face_swap_path = img.get('face_swap', {}).get('source')
-        enhance = img.get('enhance', False)
-        upscale = img.get('upscale', False)
+        prompt = image_config.get('prompt', '')
+        face_swap_config = image_config.get('face_swap', {})
+        face_source_path = face_swap_config.get('source')
+        upscale = image_config.get('upscale', False)
         
         # Merge SD settings
-        sd_settings = config['sd_defaults'].copy()
-        sd_settings.update(img.get('sd_settings', {}))
+        sd_settings = config.get('sd_defaults', {})
+        sd_settings.update(image_config.get('sd_settings', {}))
         
-        # Use complete workflow: Flux → Face Swap → Upscale
+        # Use complete Flux workflow with face swapping
         result_image = flux_generator.generate_with_face_swap_and_upscale(
             prompt=prompt,
-            face_source_path=face_swap_path,
+            face_source_path=face_source_path,
             config=config,
             sd_settings=sd_settings,
-            enhance=enhance,
+            enhance=image_config.get('enhance', False),
             upscale=upscale
         )
         
+        if result_image:
+            console.print(f"[green]✅ Generated {name} successfully![/green]")
+        else:
+            console.print(f"[red]❌ Failed to generate {name}[/red]")
+            
         return result_image
         
     except Exception as e:
-        print(f"❌ Error in Flux generation for {name}: {e}")
+        console.print(f"[red]❌ Error generating {name}: {e}[/red]")
         return None
 
-def generate_with_insightface(img, config, name):
-    """Generate mock image using InsightFace approach (mirrors test_end_to_end.py)."""
-    sd_settings = config['sd_defaults'].copy()
-    sd_settings.update(img.get('sd_settings', {}))
-    
-    # Get dimensions from SD settings or config defaults
-    width = sd_settings.get('width', config.get('mock_generation', {}).get('default_width', 1024))
-    height = sd_settings.get('height', config.get('mock_generation', {}).get('default_height', 1024))
-    
-    # Apply upscaling if enabled (mock behavior)
-    upscale = img.get('upscale', False)
-    if upscale:
-        # Simulate upscaling by increasing dimensions
-        scale_factor = 2.0
-        width = int(width * scale_factor)
-        height = int(height * scale_factor)
-    
-    # Get face swap source path
-    face_swap_path = img['face_swap']['source']
-    
-    if face_swap_path and os.path.exists(face_swap_path):
-        # Use the source face as a base for our mock generated image
-        source_face = Image.open(face_swap_path)
-        if source_face.mode == 'RGBA':
-            # Convert RGBA to RGB by creating a white background
-            rgb_image = Image.new('RGB', source_face.size, (255, 255, 255))
-            rgb_image.paste(source_face, mask=source_face.split()[-1])
-            source_face = rgb_image
-    else:
-        # Create a simple colored square if no face source is available
-        source_face = Image.new('RGB', (256, 256), (200, 150, 100))  # Skin-like color
-    
-    # Get background color from config or use default
-    bg_color_hex = config.get('mock_generation', {}).get('background_color', '#3264AA')
-    # Convert hex to RGB tuple
-    if bg_color_hex.startswith('#'):
-        bg_color_hex = bg_color_hex[1:]
-    bg_color = tuple(int(bg_color_hex[i:i+2], 16) for i in (0, 2, 4))
-    
-    # Create background
-    mock_image = Image.new('RGB', (width, height), bg_color)
-    
-    # Add the face to the center of the image
-    face_size = min(width, height) // 2
-    resized_face = source_face.resize((face_size, face_size))
-    
-    # Paste the face in the center
-    x = (width - face_size) // 2
-    y = (height - face_size) // 2
-    mock_image.paste(resized_face, (x, y))
-    
-    # Add optional text from prompt
-    prompt = img.get('prompt', '')
-    if prompt:
+def create_fallback_image(image_config: dict, config: dict, name: str) -> Image.Image:
+    """Create a fallback mock image when generation fails"""
+    try:
+        # Get dimensions
+        sd_settings = config.get('sd_defaults', {})
+        sd_settings.update(image_config.get('sd_settings', {}))
+        
+        width = sd_settings.get('width', 1024)
+        height = sd_settings.get('height', 1024)
+        
+        # Apply upscaling if enabled
+        if image_config.get('upscale', False):
+            width *= 2
+            height *= 2
+        
+        # Create background
+        bg_color = (50, 100, 150)  # Nice blue
+        mock_image = Image.new('RGB', (width, height), bg_color)
+        
+        # Add face if available
+        face_swap_config = image_config.get('face_swap', {})
+        face_source_path = face_swap_config.get('source')
+        
+        if face_source_path and os.path.exists(face_source_path):
+            face_img = Image.open(face_source_path)
+            face_size = min(width, height) // 3
+            face_img = face_img.resize((face_size, face_size), Image.Resampling.LANCZOS)
+            
+            # Center the face
+            x = (width - face_size) // 2
+            y = (height - face_size) // 2
+            mock_image.paste(face_img, (x, y))
+        
+        # Add text overlay
         draw = ImageDraw.Draw(mock_image)
-        # Add prompt text at the top
-        text_y = 10
-        # Truncate prompt if too long
-        display_text = prompt[:50] + '...' if len(prompt) > 50 else prompt
-        draw.text((10, text_y), display_text, fill=(255, 255, 255))
-    
-    # Add identifier text to indicate this is a mock image
-    draw = ImageDraw.Draw(mock_image)
-    draw.text((10, height - 30), f"Mock {name}", fill=(255, 255, 255))
-    
-    return mock_image
+        prompt = image_config.get('prompt', '')[:50]
+        draw.text((10, 10), f"Fallback: {name}", fill=(255, 255, 255))
+        draw.text((10, 30), prompt, fill=(255, 255, 255))
+        
+        return mock_image
+        
+    except Exception as e:
+        console.print(f"[red]❌ Error creating fallback image: {e}[/red]")
+        return None
 
 @app.command()
 def main(
-    prompts: str = typer.Option('promfy_prompts.yaml', help="Prompt YAML file"),
-    backend: str = typer.Option(None, help="Backend for generation to use")
+    prompts: str = typer.Option('promfy_prompts.yaml', help="Path to prompts YAML file"),
+    config_file: str = typer.Option('config.yaml', help="Path to configuration file"),
+    output_dir: str = typer.Option(None, help="Output directory (overrides config)"),
+    batch_size: int = typer.Option(None, help="Number of images to generate"),
+    face_image: str = typer.Option(None, help="Face reference image path"),
+    verbose: bool = typer.Option(False, help="Enable verbose output")
 ):
+    """
+    Generate images using Flux Kontext Pro with native face swapping
+    
+    This script processes prompts from a YAML file and generates high-quality
+    images with seamless face integration using Flux Kontext Pro.
+    """
+    
+    # Load environment variables
     load_dotenv()
-    config = load_config(cli_backend=backend)
     
-    # Only initialize ComfyUI API if not using InsightFace backend
-    api = None
-    if config['generation']['backend'] != 'insightface':
-        comfyui_api_url = os.getenv('COMFYUI_API_URL', config.get('comfyui_api_url', 'http://127.0.0.1:8188/prompt'))
-        workflow_path = config.get('workflow_path', 'workflows/base_workflow.json')
-        api = ComfyUIAPI(comfyui_api_url, workflow_path)
+    # Display header
+    console.print(Panel.fit(
+        "🎵 [bold blue]Face The Music - Image Generation[/bold blue]\\n"
+        "Professional face swapping with Flux Kontext Pro",
+        title="Face The Music v2.1"
+    ))
     
-    output_dir = config['output_dir']
-    os.makedirs(output_dir, exist_ok=True)
+    # Load configuration
+    config = load_config(config_file)
     
-    # Set the temporary face directory constant
-    global PREPARED_FACE_DIR
-    PREPARED_FACE_DIR = os.path.join(output_dir, "temp_faces")
-    os.makedirs(PREPARED_FACE_DIR, exist_ok=True)
+    # Override output directory if specified
+    if output_dir:
+        config['output_dir'] = output_dir
     
-    # Clean up old files from previous runs
-    if os.path.exists(PREPARED_FACE_DIR):
-        for f in os.listdir(PREPARED_FACE_DIR):
-            file_path = os.path.join(PREPARED_FACE_DIR, f)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
+    output_path = Path(config.get('output_dir', 'output'))
+    output_path.mkdir(exist_ok=True)
+    
+    # Setup temp directory for face processing
+    temp_dir = output_path / "temp_faces"
+    temp_dir.mkdir(exist_ok=True)
+    
+    # Load prompts
     prompts_data = load_prompts(prompts)
     images = prompts_data.get('images', {})
+    
     if not images:
-        print("No images found in prompt file.")
+        console.print("[red]❌ No images found in prompt file[/red]")
         sys.exit(1)
-    with Progress() as progress:
-        task = progress.add_task("Generating images...", total=len(images))
-        for name, image in images.items():
-            img = {
-                'prompt': image.get('prompt', ''),
-                'negative_prompt': image.get('negative_prompt', ''),
-                'sd_settings': image.get('sd_settings', {}),
-                'face_swap': image.get('face_swap', {}),
-                'enhance': image.get('enhance', False),
-                'upscale': image.get('upscale', False)
-            }
+    
+    # Limit batch size if specified
+    if batch_size:
+        images = dict(list(images.items())[:batch_size])
+    
+    console.print(f"[blue]📝 Found {len(images)} images to generate[/blue]")
+    
+    # Check API token
+    if not os.getenv('REPLICATE_API_TOKEN'):
+        console.print("[red]❌ REPLICATE_API_TOKEN not set![/red]")
+        console.print("Set it with: export REPLICATE_API_TOKEN='your_token_here'")
+        sys.exit(1)
+    
+    try:
+        # Initialize Flux generator
+        console.print("[blue]🔧 Initializing Flux Kontext Pro...[/blue]")
+        flux_generator = ReplicateFluxGenerator()
+        
+        # Process each image
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TimeElapsedColumn(),
+            console=console
+        ) as progress:
             
-            # Prepare source face image if defined
-            original_source = img['face_swap'].get('source')
-            if original_source:
-                prepared = prepare_source_face_image(original_source, PREPARED_FACE_DIR)
-                img['face_swap']['source'] = prepared
+            task = progress.add_task("Generating images...", total=len(images))
             
-            prompt = img.get('prompt', '')
-            negative_prompt = img.get('negative_prompt', '')
-            sd_settings = config['sd_defaults'].copy()
-            sd_settings.update(img.get('sd_settings', {}))
-            face_swap_path = img.get('face_swap', {}).get('source')
-            enhance = img.get('enhance', False)
-            upscale = img.get('upscale', False)
-            # Choose generation backend
-            backend = config['generation']['backend']
-            
-            if backend == 'flux':
-                # Use Flux workflow with face swap and upscaling
-                generated_image = generate_with_flux(img, config, name)
+            for name, image_config in images.items():
+                progress.update(task, description=f"Processing {name}")
+                
+                # Override face image if specified via CLI
+                if face_image:
+                    if 'face_swap' not in image_config:
+                        image_config['face_swap'] = {}
+                    image_config['face_swap']['source'] = face_image
+                
+                # Prepare face image if specified
+                face_swap_config = image_config.get('face_swap', {})
+                original_face_path = face_swap_config.get('source')
+                
+                if original_face_path:
+                    prepared_face_path = prepare_face_image(original_face_path, str(temp_dir))
+                    if prepared_face_path:
+                        image_config['face_swap']['source'] = prepared_face_path
+                
+                # Generate image
+                start_time = time.time()
+                generated_image = generate_with_flux(image_config, config, name, flux_generator)
+                generation_time = time.time() - start_time
+                
+                # Fallback to mock image if generation failed
+                if not generated_image:
+                    console.print(f"[yellow]⚠️  Creating fallback image for {name}[/yellow]")
+                    generated_image = create_fallback_image(image_config, config, name)
+                
+                # Save the result
                 if generated_image:
-                    output_path = os.path.join(output_dir, f"{name}.png")
-                    save_image(generated_image, output_path)
-                    print(f"✅ Flux image with face swap and upscaling saved to: {output_path}")
-                    result = {'image_saved': True}
+                    output_file = output_path / f"{name}.png"
+                    generated_image.save(output_file, format='PNG')
+                    
+                    file_size = output_file.stat().st_size / (1024 * 1024)  # MB
+                    console.print(
+                        f"[green]✅ Saved {name}: {output_file} "
+                        f"({generated_image.size[0]}×{generated_image.size[1]}, "
+                        f"{file_size:.1f}MB, {generation_time:.1f}s)[/green]"
+                    )
                 else:
-                    print(f"❌ Failed to generate image with Flux: {name}")
-                    progress.advance(task)
-                    continue
-            elif backend == 'comfyui':
-                # Use ComfyUI workflow
-                workflow = api.load_workflow()
-                workflow = api.inject_prompts(workflow, prompt, negative_prompt, sd_settings, face_swap_path, enhance, upscale)
-                result = api.post_workflow(workflow)
-                if not result:
-                    print(f"Failed to generate image: {name}")
-                    progress.advance(task)
-                    continue
-            else:
-                # Mock generation for InsightFace backend
-                mock_image = generate_with_insightface(img, config, name)
-                output_path = os.path.join(output_dir, f"{name}.png")
-                mock_image.save(output_path, format='PNG')
-                print(f"Upscaled mock image saved to: {output_path}")
-                generated_image = mock_image
-                result = {'image_saved': True}
-            # Save output image (assume result contains image bytes or path)
-            # This part may need to be adapted to your workflow's output format
-            # IMPORTANT: The upscaler output (if enabled) is already applied at this point
-            # since upscale=True is passed to inject_prompts and processed by ComfyUI
-            output_path = os.path.join(output_dir, f"{name}.png")
-            generated_image = None
-            
-            if 'image' in result:
-                save_image(result['image'], output_path)
-                # Verify the upscaled image is saved before face swap
-                print(f"Upscaled image saved to: {output_path}")
-                # Load the saved image for potential face swapping
-                generated_image = Image.open(output_path)
-            elif 'output_path' in result:
-                # Copy file from output_path
-                from shutil import copyfile
-                copyfile(result['output_path'], output_path)
-                # Verify the upscaled image is saved before face swap
-                print(f"Upscaled image copied to: {output_path}")
-                # Load the image for potential face swapping
-                generated_image = Image.open(output_path)
-            elif 'image_saved' in result and generated_image is not None:
-                # Mock generation case - image already saved and loaded
-                print(f"Mock upscaled image ready for face swap: {output_path}")
-            else:
-                print(f"No image data found for {name}")
+                    console.print(f"[red]❌ Failed to generate {name}[/red]")
+                
                 progress.advance(task)
-                continue
-            
-            # Face swapping is now handled natively by Flux Kontext Pro during generation
-            # No additional face swap processing needed
-            progress.advance(task)
-    print(f"\nAll images processed. Check the '{output_dir}' directory.")
+        
+        console.print(f"\\n[bold green]🎉 Generation complete![/bold green]")
+        console.print(f"📁 Output directory: {output_path}")
+        console.print(f"📊 Generated {len(images)} images")
+        
+    except KeyboardInterrupt:
+        console.print("\\n[yellow]⚠️  Generation interrupted by user[/yellow]")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"\\n[red]❌ Unexpected error: {e}[/red]")
+        if verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
-    app() 
+    app()

@@ -1,14 +1,11 @@
 # Default configuration for Face The Music image generation
-# ComfyUI-specific fields (commented out for insightface backend)
-# comfyui_api_url: http://127.0.0.1:8188/prompt
-# workflow_path: workflows/base_workflow.json
 output_dir: output
 faces_dir: faces
 models_dir: models
 
 # Generation backend configuration
 generation:
-  backend: "flux"  # Options: "insightface", "comfyui", "flux"
+  backend: "flux"  # Options: "flux", "insightface"
 
 # Mock generation parameters
 mock_generation:

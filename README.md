@@ -1,6 +1,6 @@
 # Face The Music 🎵
 
-[![Version](https://img.shields.io/badge/version-2.0.0--beta.1-blue.svg)](https://github.com/isndotbiz/face-the-music/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0--beta.2--dev-blue.svg)](https://github.com/isndotbiz/face-the-music/releases)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -142,7 +142,39 @@ luxury_themes:
 
 ## 🎮 Usage
 
-### Basic Generation
+### 🎬 Professional Pipeline v2.1 (NEW!)
+
+Our new ultra-realistic professional pipeline provides cinema-grade quality:
+
+```bash
+# Check system status
+python pipeline_cli.py status
+
+# View available presets
+python pipeline_cli.py presets
+
+# Process single image with preset
+python pipeline_cli.py process -i input.jpg -f faces/your_face.png --preset cinema_grade
+
+# Batch process directory
+python pipeline_cli.py batch photos/ -f faces/your_face.png --preset balanced
+```
+
+#### 🎨 Processing Presets
+
+- **Cinema Grade** 🏆: Professional cinema quality with HDR (slow, highest quality)
+- **Ultra Quality** ⭐: Maximum quality for final outputs (slow)
+- **Balanced** ✨: Good quality with reasonable speed (recommended)
+- **Fast** 🚀: Quick results for testing and previews
+
+#### 🔄 4-Stage Pipeline Process
+
+1. **Advanced Face Swap** - Flux Kontext Pro with sub-pixel precision
+2. **Neural Upscaling** - Real-ESRGAN Ultra for 4K-8K resolution
+3. **AI Refinement** - Stable Diffusion XL Turbo enhancement
+4. **Cinema Post-Processing** - Color grading, noise reduction, film grain
+
+### Basic Generation (Legacy)
 
 ```bash
 # Generate with default settings

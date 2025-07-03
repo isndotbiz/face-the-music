@@ -1,7 +1,7 @@
 # Face The Music 🎵
 
 [![Version](https://img.shields.io/badge/version-2.0.0--beta.2--dev-blue.svg)](https://github.com/isndotbiz/face-the-music/releases)
-[![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-green.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](tests/)
@@ -54,7 +54,7 @@ python generate_images.py
 
 | Component | Version | Status |
 |-----------|---------|--------|
-| Python | 3.8+ | ✅ Required |
+| Python | 3.10 or 3.11 | ✅ Required |
 | Replicate API | Latest | ✅ Required |
 | Face Image | 1024×1024 | ✅ Required |
 | RAM | 8GB+ | 💡 Recommended |
@@ -169,7 +169,7 @@ python pipeline_cli.py batch photos/ -f faces/your_face.png --preset balanced
 
 #### 🔄 4-Stage Pipeline Process
 
-1. **Advanced Face Swap** - Flux Kontext Pro with sub-pixel precision
+1. **Advanced Face Swap** - Flux Kontext Pro with sub-pixel precision (max height: 1440px)
 2. **Neural Upscaling** - Real-ESRGAN Ultra for 4K-8K resolution
 3. **AI Refinement** - Stable Diffusion XL Turbo enhancement
 4. **Cinema Post-Processing** - Color grading, noise reduction, film grain

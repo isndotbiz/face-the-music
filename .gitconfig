@@ -1,0 +1,9 @@
+[core]
+    editor = echo
+    pager = cat
+[pager]
+    diff = false
+    log = false
+    show = false
+[init]
+    defaultBranch = main

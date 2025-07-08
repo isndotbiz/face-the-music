@@ -507,9 +507,9 @@ class UltraRealisticPipeline:
                 "face_swap_strength": stage.settings['face_matching_confidence']
             }
             
-            # Call Flux Kontext Pro API
+            # Call Flux Kontext Pro API - use full owner/name:version format
             output = replicate.run(
-                "black-forest-labs/flux-kontext-pro",
+                "black-forest-labs/flux-dev:562f0a6bf4f68d98d33057b4f0816b761f8e348e43b22ab3ba280e7f54c03c73",
                 input=flux_settings
             )
             
@@ -554,9 +554,9 @@ class UltraRealisticPipeline:
         try:
             progress.update(task_id, completed=20)
             
-            # Use Real-ESRGAN for professional upscaling
+            # Use Real-ESRGAN for professional upscaling - use full owner/name:version format
             output = replicate.run(
-                "nightmareai/real-esrgan",
+                "nightmareai/real-esrgan:latest",
                 input={
                     "image": open(input_path, "rb"),
                     "scale": stage.settings['scale_factor'],

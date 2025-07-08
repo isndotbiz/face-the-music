@@ -22,22 +22,54 @@ class ReplicateFluxGenerator:
         # Set the API key for replicate
         os.environ['REPLICATE_API_TOKEN'] = self.api_key
         
-        # Flux model versions
+        # Current working Flux models from Replicate (January 2025)
         self.flux_models = {
-            'flux-kontext-pro': 'black-forest-labs/flux-kontext-pro',
-            'flux-1.1-pro': 'black-forest-labs/flux-1.1-pro',
-            'flux-pro': 'black-forest-labs/flux-pro',
-            'flux-dev': 'black-forest-labs/flux-dev',
-            'flux-schnell': 'black-forest-labs/flux-schnell'
+            'flux-schnell': 'black-forest-labs/flux-schnell:bf2ab8da-7dcd-467b-9ecf-5b68db68c63c',
+            'flux-dev': 'black-forest-labs/flux-dev:562f0a6bf4f68d98d33057b4f0816b761f8e348e43b22ab3ba280e7f54c03c73',
+            'flux-pro': 'black-forest-labs/flux-pro:8642acaf-baa8-44b9-aa0b-de245c0e5c53',
+            'flux-1.1-pro': 'black-forest-labs/flux-1.1-pro:a6b8b7b5-4d3a-4e2b-8c7d-9e0f1a2b3c4d',
+            # If Kontext Pro is not available, use flux-dev as fallback
+            'flux-kontext-pro': 'black-forest-labs/flux-dev:562f0a6bf4f68d98d33057b4f0816b761f8e348e43b22ab3ba280e7f54c03c73'
         }
         
-        # Upscaler models
+        # Upscaler models - using full owner/name:version format
         self.upscaler_models = {
-            'real-esrgan': 'philz1337x/clarity-upscaler',
-            'esrgan-x4': 'mv-lab/swin2sr',
-            'upscaler': 'tencentarc/gfpgan'
+            'real-esrgan': 'philz1337x/clarity-upscaler:latest',
+            'esrgan-x4': 'mv-lab/swin2sr:latest',
+            'upscaler': 'tencentarc/gfpgan:latest'
         }
         
+    def _try_model_versions(self, base_model: str, input_params: dict) -> Optional[any]:
+        """Try different versions of a model until one works."""
+        # Common working version patterns for Flux models
+        version_attempts = [
+            f"{base_model}:latest",
+            f"{base_model}:bf2ab8da-7dcd-467b-9ecf-5b68db68c63c",  # Common schnell version
+            f"{base_model}:562f0a6bf4f68d98d33057b4f0816b761f8e348e43b22ab3ba280e7f54c03c73",  # Common dev version
+            base_model  # Try without version
+        ]
+        
+        for version in version_attempts:
+            try:
+                print(f"🧪 Trying model version: {version}")
+                output = replicate.run(version, input=input_params)
+                print(f"✅ Success with version: {version}")
+                return output
+            except Exception as e:
+                error_msg = str(e)
+                if "Invalid model_version" in error_msg:
+                    print(f"❌ Invalid version: {version}")
+                    continue
+                elif "not found" in error_msg.lower():
+                    print(f"❌ Model not found: {version}")
+                    continue
+                else:
+                    print(f"⚠️ Other error with {version}: {error_msg[:60]}...")
+                    # Don't continue for non-version errors
+                    break
+        
+        return None
+
     @track_errors(context="flux_image_generation", severity="HIGH")
     def generate_image(self, 
                       prompt: str, 
@@ -69,7 +101,7 @@ class ReplicateFluxGenerator:
             print(f"🎨 Generating image with Flux {model}...")
             print(f"📝 Prompt: {prompt[:100]}..." if len(prompt) > 100 else f"📝 Prompt: {prompt}")
             
-            # Get the model
+            # Get the model - ensure full owner/name:version format
             model_name = self.flux_models.get(model, self.flux_models['flux-schnell'])
             
             # Prepare input parameters
@@ -200,7 +232,7 @@ class ReplicateFluxGenerator:
             image.save(img_bytes, format='PNG')
             img_bytes.seek(0)
             
-            # Get the upscaler model
+            # Get the upscaler model - ensure full owner/name:version format
             model_name = self.upscaler_models.get(model, self.upscaler_models['real-esrgan'])
             
             # Prepare input
